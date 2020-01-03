@@ -1,7 +1,6 @@
 <template>
 <div id="app">
    <v-app>
-
        <v-app-bar  app clipped-left color='primary'>
            <v-app-bar-nav-icon @click.stop="drawer = !drawer" ></v-app-bar-nav-icon>
            <v-toolbar-title>Chez Sachat</v-toolbar-title>
@@ -14,7 +13,7 @@
              <v-icon>mdi-magnify</v-icon>
            </v-btn>
 
-           <v-menu
+            <v-menu
              left
              bottom
            >
@@ -52,7 +51,7 @@
            <v-divider></v-divider>
 
            <v-list dense>
-               <v-list-item link :to="{path:'/home'}">
+               <v-list-item link :to="{path:'/'}">
                  <v-list-item-action>
                    <v-icon>mdi-fire</v-icon>
                  </v-list-item-action>
@@ -80,7 +79,6 @@
                </v-list-item>
             </v-list>
        </v-navigation-drawer>
-
        <v-content>
            <v-container >
                <v-fade-transition mode="out-in">
@@ -97,7 +95,7 @@
 <style>
 
 
-@import './variables.scss';
+@import './views/variables.scss';
 
 
 /* Cloak elements on initial load to hide the possible display of {{ ... }}
@@ -107,6 +105,7 @@
  *    [v-cloak]::before { content: "loading…" }
  */
 [v-cloak] > * { display: none; }
+[v-cloak]::before { content: "loading…" }
 
 /*  Colours for Syntax Highlighted pre's */
 .syntax-highlight {color:white;background-color:black;padding:5px 10px;}

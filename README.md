@@ -1,8 +1,12 @@
 # sachat-app
 
+dependencies : Vuetify, Router, Vuex.
+Plugins : Vuebars.
+
 ## Project setup
 ```
-npm install
+
+npm i vuebars -S
 ```
 
 ### Compiles and hot-reloads for development

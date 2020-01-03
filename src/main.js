@@ -3,12 +3,9 @@ import App from './App.vue'
 import './registerServiceWorker'
 import router from './router'
 import store from './store'
-import Vuetify from './plugins/vuetify';
-import bars from './lib/vue-bars/bars.js';
-import stats from './stats.js'
-import settings from './settings.js'
+import vuetify from './plugins/vuetify';
 
-Vue.use(Vuetify)
+//Vue.use(Vuetify)
 
 Vue.config.productionTip = false
 
@@ -24,49 +21,15 @@ Vue.filter('two_digits', (value) => {
 });
 
 
-var app = new Vue({
+new Vue({
     el: '#app',
     router,
     store,
     render: h => h(App),
-    vuetify: new Vuetify({
-        theme: { dark: true ,
-                    themes: {
-                      light: {
-                        primary: '#23C48E',
-                        secondary: '#23C48E',
-                        accent: '#23C48E',
-                        error: '#D3435C',
-                      },
-                      dark: {
-                        primary: '#23C48E',
-                        secondary: '#23C48E',
-                        tertiary:'#23C48E',
-                        accent: '#23C48E',
-                        error: '#D3435C',
-                        base: '#182026',
-                        info: '#2196F3',
-                        anchor: '#8c9eff',
-                        success: '#4CAF50',
-                        warning: '#FFC107',
-                        lighten5: '#f5f8fa',
-                        lighten4: '#ebf1f5',
-                        lighten3: '#e1e8ed',
-                        lighten2: '#d8e1e8',
-                        lighten1: '#ced9e0',
-                        darken1: '#202b33',
-                        darken2: '#293742',
-                        darken3: '#30404d',
-                        darken4: '#394b59',
-                      },
-                    },
-        },
-    }),
-
-
+    vuetify,
     data() {
         return {
-            drawer: null,
+            drawer: false,
     }
 
     },
@@ -82,10 +45,10 @@ var app = new Vue({
             //console.log('[indexjs:Vue.mounted] app mounted - setting up uibuilder watchers')
 
             //start uibuilder object ton interact with node-red
-            uibuilder.start()
+//            uibuilder.start()
 
             // send a poke to node-red to trigger updated values at launch
-            uibuilder.send( { 'topic': 'stateRequest', 'payload': 'stateRequest'})
+//            uibuilder.send( { 'topic': 'stateRequest', 'payload': 'stateRequest'})
         },
 
 

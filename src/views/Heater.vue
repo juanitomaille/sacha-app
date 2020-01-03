@@ -1,5 +1,5 @@
 <template>
-  <v-layout>
+  <div class="heater">
       <v-layout align-center justify-center column>
 
           <h1 class="display-2 font-weight-bold mb-3">Allumons la chaudière</h1>
@@ -8,7 +8,7 @@
       <v-layout justify-center align-center column>
           <v-flex mb-4 mt-12>
 
-          <v-btn @click=switchState depressed x-large :class="[heaterstate ? 'error' : 'primary']"> {{ stateText }} </v-btn>
+          <v-btn @click=switchState depressed x-large :class="[(heaterState == 'ON') ? 'error' : 'primary']"> {{ heaterState }} </v-btn>
 
           </v-flex>
           <v-flex mb-4>
@@ -37,7 +37,7 @@
                     temps écoulé depuis le dernier lancement :
                   </v-card-text>
                   <v-card-title class="justify-center">
-                      <span  :class="colorClassTime" @update-timer>
+                      <span  :class="colorClassTime" @update-timer.prevent>
                           {{lasttime.text}}
                       </span>
                   </v-card-title>
@@ -71,16 +71,22 @@
           </bars>
       </div>
       </v-layout>
-  </v-layout>
+  </div>
 </template>
 
-<<script>
+<script>
+
+import Vue from 'vue'
+import Bars from 'vuebars';
+import Mqtt from '@/mqtt';
 
 
+Vue.use(Bars)
+Vue.use(Mqtt)
 
 export default {
 
-    name: "Heater",
+    name: "heater",
     props: {
 
     },
@@ -94,25 +100,21 @@ export default {
             showAlert: false,
             timer: false,
 
-            heaterstate: false,
             lasttime: {
                 text: 'non connu',
                 color:'white',
                 value: '1000'
             },
-            stateText: "OFF",
+            stateText: 'OFF',
             timerFlag: false,
 
             datas: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         }
     },
 
-    components: {
-        bars
-    },
     mounted() {
 
-        this.updateFromMQTT()
+        this.retreiveDataFromMQTT()
     },
 
 
@@ -120,15 +122,18 @@ export default {
 
         switchState: function(event) {
 
-            //console.log('Button Pressed. Event DatA: ', event)
-            this.$emit("update-heaterstate", this.heaterstate);
-            if (this.heaterstate === false) this.startHeater()
-            else if(this.heaterstate === true) this.stopHeater()
+            console.log('Button Pressed. Event DatA: ', event)
+             this.$store.commit('switchHeaterState')
+             if( Mqtt.publish('/home/heater/state',this.heaterState.toString())){
+               if (this.heaterState === 'ON') this.startHeater()
+               else if(this.heaterState === 'OFF') this.stopHeater()
+             }
+
 
         },
 
         startHeater: function () {
-            uibuilder.send( { 'topic': '/home/heater/state', 'payload': 'ON'})
+
             this.startCountDown(0,15)
             console.log('[startHeater] state :', this.heaterState)
 
@@ -137,8 +142,7 @@ export default {
 
         stopHeater: function() {
             this.stopCountDown()
-            uibuilder.send( { 'topic': '/home/heater/state', 'payload': 'OFF'})
-            uibuilder.send( { 'topic': '/home/heater/lastrun', 'payload': + this.now})
+            Mqtt.publish('/home/heater/lastrun', this.now )
 
         },
 
@@ -164,7 +168,7 @@ export default {
             this.dateInMilliseconds= Math.trunc(Date.parse(d) / 1000)
             //console.log('[minutes] dateInMilliseconds :',this.dateInMilliseconds)
 
-            uibuilder.send( { 'topic': '/home/heater/timer', 'payload': '1'}) // indicate to MQTT that a timer is running
+  //          uibuilder.send( { 'topic': '/home/heater/timer', 'payload': '1'}) // indicate to MQTT that a timer is running
         },
 
         stopCountDown: function(){
@@ -173,34 +177,38 @@ export default {
             this.showAlert = true
             clearInterval(this.timer)
 
-            uibuilder.send( { 'topic': '/home/heater/timer', 'payload': '0'}) // indicate to MQTT that no timer run
+    //        uibuilder.send( { 'topic': '/home/heater/timer', 'payload': '0'}) // indicate to MQTT that no timer run
 
         },
 
         // this app update values from MQTT
-        updateFromMQTT: function() {
+        retreiveDataFromMQTT: function() {
 
-            var vueApp = this
-            // on state change of heater
-            try {
-                uibuilder.onChange('msg', function(msg){
-                    console.log('[uibuilder.onChange] heater state from MQTT :', msg.payload)
+          var HeaterVue = this
+          try {
+
+            Mqtt.launch('sacha-app', (topic, source) => {
+                var _data
+                console.log('"message": ', _data = JSON.parse('{ "topic" : "' + topic.toString() + '", "message" : "' + source.toString() + '" }'))
+                if (_data.topic == '/home/heater/state') HeaterVue.heaterState =_data.message
+              })
+          }
+          catch (e) {
+              console.log('erreur MQTT:launch')
+          }
+          Mqtt.subscribe('/home/heater/state')
+          Mqtt.subscribe('/home/heater/lastrun')
+
+
                     // updating var in app
-                    if (msg.topic == '/home/heater/stats') vueApp.datas = msg.payload
-                    vueApp.update( (msg.payload.state == "ON") ? true : false )
-                    vueApp.lasttime.value = msg.payload.lastRun
-                    vueApp.timer = (msg.payload.timer == '1') ? true : false
-                })
-            } catch (e) {
-                // catch error in console
-                console.log("[uibuilder.onChange] doesn't work!");
-            }
+                    // topic == '/home/heater/stats') vueApp.datas = msg.payload
+                    // vueApp.update( (msg.payload.state == "ON") ? true : false )
+                    // lasttime.value = msg.payload.lastRun
+                    // timer = (msg.payload.timer == '1') ? true : false
+
         },
 
-        update: function (state) {
-           this.heaterstate =  state;
-           this.stateText = state ? "ON" : "OFF"
-        },
+
     }, // --- End of methods --- //
 
     computed: {
@@ -221,9 +229,9 @@ export default {
 
         colorClassTime() {
 
-            var v = this.lasttime.value
+      //      var v = this.lasttime.value
 
-
+/*
 
             if (this.showCountDown === false && this.timer === true) {
                 this.lasttime.text = "Un autre l'a lancé !"
@@ -243,6 +251,19 @@ export default {
             }
 
             return this.lasttime.color;
+            */
+
+            return "orange--text"
+        },
+
+        heaterState: {
+            get() {
+              return this.$store.state.heaterState.toString()
+            },
+            set(newState){
+              this.$store.state.heaterState = newState
+            }
+
         }
 
 

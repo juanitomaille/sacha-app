@@ -1,14 +1,16 @@
 <template>
+  <div class="settings">
   <v-layout align-center justify-center column>
       <h1 class="display-2 font-weight-bold mb-3">Settings</h1>
   </v-layout>
+  </div>
 </template>
 
 <script>
 
 export default {
 
-    name:'Settings',
+    name:'settings',
     props: {
     },
 
