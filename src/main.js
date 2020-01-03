@@ -5,7 +5,7 @@ import router from './router'
 import store from './store'
 import vuetify from './plugins/vuetify';
 
-//Vue.use(Vuetify)
+
 
 Vue.config.productionTip = false
 
@@ -25,14 +25,8 @@ new Vue({
     el: '#app',
     router,
     store,
-    render: h => h(App),
     vuetify,
-    data() {
-        return {
-            drawer: false,
-    }
-
-    },
+    render: h => h(App),
 
     mounted(){
 
@@ -42,7 +36,7 @@ new Vue({
 
     methods:{
         initApp: function() {
-            //console.log('[indexjs:Vue.mounted] app mounted - setting up uibuilder watchers')
+            console.log('[indexjs:Vue.mounted] app mounted - setting up uibuilder watchers')
 
             //start uibuilder object ton interact with node-red
 //            uibuilder.start()

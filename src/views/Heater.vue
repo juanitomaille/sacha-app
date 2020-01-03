@@ -6,11 +6,18 @@
 
       </v-layout>
       <v-layout justify-center align-center column>
-          <v-flex mb-4 mt-12>
 
-          <v-btn @click=switchState depressed x-large :class="[(getHeaterState == 'ON') ? 'error' : 'primary']"> {{ getHeaterState }} </v-btn>
 
-          </v-flex>
+            <transition name="fade" mode="out-in">
+              <div v-if="!getHeaterState">
+                <v-btn x-large class="greyButton"><v-progress-circular /> </v-btn>
+              </div>
+               <div v-else-if="getHeaterState">
+                 <v-btn @click=switchState depressed x-large :class="[(getHeaterState == 'ON') ? 'error' : 'primary']"> {{ getHeaterState }} </v-btn>
+               </div>
+            </transition>
+
+
           <v-flex mb-4>
               <div class="countdown" v-if="showCountDown">
                   <div class="block">
@@ -295,6 +302,12 @@ export default {
 
   .countdown {
     display: flex;
+  }
+
+  .greyButton {
+    background-color:#e1e8ed;
+
+
   }
 
 
