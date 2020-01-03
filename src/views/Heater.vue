@@ -8,7 +8,7 @@
       <v-layout justify-center align-center column>
           <v-flex mb-4 mt-12>
 
-          <v-btn @click=switchState depressed x-large :class="[(heaterState == 'ON') ? 'error' : 'primary']"> {{ heaterState }} </v-btn>
+          <v-btn @click=switchState depressed x-large :class="[(getHeaterState == 'ON') ? 'error' : 'primary']"> {{ getHeaterState }} </v-btn>
 
           </v-flex>
           <v-flex mb-4>
@@ -77,6 +77,8 @@
 <script>
 
 import Vue from 'vue'
+import {mapGetters} from 'vuex'
+import {mapActions} from 'vuex'
 import Bars from 'vuebars';
 import Mqtt from '@/mqtt';
 
@@ -112,30 +114,39 @@ export default {
         }
     },
 
+    created(){
+
+    },
+
     mounted() {
 
-        this.retreiveDataFromMQTT()
+                    this.retreiveDataFromMQTT()
     },
 
 
     methods: {
 
+      ...mapActions({
+        switchHeaterState : 'switchHeaterState',
+        setHeaterState : 'setHeaterState'
+      }),
+
+
         switchState: function(event) {
 
             console.log('Button Pressed. Event DatA: ', event)
-             this.$store.commit('switchHeaterState')
-             if( Mqtt.publish('/home/heater/state',this.heaterState.toString())){
-               if (this.heaterState === 'ON') this.startHeater()
-               else if(this.heaterState === 'OFF') this.stopHeater()
+
+             this.switchHeaterState(this.getHeaterState)
+             if( Mqtt.publish('/home/heater/state',this.getHeaterState)){
+               if (this.getHeaterState === 'ON') this.startHeater()
+               else if(this.getHeaterState === 'OFF') this.stopHeater()
              }
-
-
         },
 
         startHeater: function () {
 
             this.startCountDown(0,15)
-            console.log('[startHeater] state :', this.heaterState)
+            console.log('[startHeater] state :', this.getHeaterState)
 
 
         },
@@ -184,20 +195,26 @@ export default {
         // this app update values from MQTT
         retreiveDataFromMQTT: function() {
 
-          var HeaterVue = this
+          var AppVue = this
           try {
 
             Mqtt.launch('sacha-app', (topic, source) => {
                 var _data
-                console.log('"message": ', _data = JSON.parse('{ "topic" : "' + topic.toString() + '", "message" : "' + source.toString() + '" }'))
-                if (_data.topic == '/home/heater/state') HeaterVue.heaterState =_data.message
+                console.log('message: ', _data = JSON.parse('{ "topic" : "' + topic + '", "message" : "' + source + '"}'))
+                if (_data.topic == '/home/heater/state'){
+                  AppVue.$store.commit('SET_STATE', _data.message)
+                  console.log('store :', _data.message)
+                _data = ''
+                }
               })
           }
           catch (e) {
               console.log('erreur MQTT:launch')
           }
+
           Mqtt.subscribe('/home/heater/state')
           Mqtt.subscribe('/home/heater/lastrun')
+
 
 
                     // updating var in app
@@ -212,6 +229,12 @@ export default {
     }, // --- End of methods --- //
 
     computed: {
+
+      ...mapGetters({
+        getHeaterState: 'getHeaterState'
+      }),
+
+
 
 
         seconds() {
@@ -255,17 +278,6 @@ export default {
 
             return "orange--text"
         },
-
-        heaterState: {
-            get() {
-              return this.$store.state.heaterState.toString()
-            },
-            set(newState){
-              this.$store.state.heaterState = newState
-            }
-
-        }
-
 
     },
     beforeDestroy(){

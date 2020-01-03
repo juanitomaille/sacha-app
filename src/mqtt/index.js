@@ -23,6 +23,9 @@ export default {
     console.log('subscribe:', topic)
   },
   publish(topic, message) {
-    client.publish(topic, JSON.stringify(message), {qos: 1})
+    client.publish(topic, message, {qos: 1, retain: true})
+  },
+  poke(topic, message) {
+    client.publish(topic, message, {qos: 1, retain: false})
   }
 }
