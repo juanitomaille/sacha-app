@@ -3,18 +3,40 @@ import Vuex from 'vuex'
 
 Vue.use(Vuex)
 
+const timerModule = {
+    state: {
+      expectedEnd: ''
+    },
+    mutations: {
+
+      START_TIMER: (state, date) => {
+      state.expectedEnd = date
+      },
+
+    },
+    getters: {
+       getEndTime: (state) => {
+         return state.expectedEnd
+       }
+    },
+    actions: {
+
+    },
+    strict: true
+}
+
 const store = new Vuex.Store({
   state: {
-    heaterState: ''
+    heaterState: '',
   },
   mutations: {
 
     STATE_ON: (state) => {
-      state.heaterState = "ON"
+      state.heaterState = 'ON'
     },
 
     STATE_OFF: (state) => {
-      state.heaterState = "OFF"
+      state.heaterState = 'OFF'
     },
 
     SET_STATE: (state, s) => {
@@ -22,8 +44,8 @@ const store = new Vuex.Store({
     },
 
     SWITCH_STATE: (state) => {
-        if (state.heaterState === "OFF") this.commit('STATE_ON')
-        else if(state.heaterState === "ON") this.commit('STATE_OFF')
+        if (state.heaterState === 'OFF') this.commit('STATE_ON')
+        else if(state.heaterState === 'ON') this.commit('STATE_OFF')
       }
 
 
@@ -35,18 +57,19 @@ const store = new Vuex.Store({
   },
   actions: {
     setHeaterState(state,s) {
-        console.log('state in setHeaterState :', state)
-        if (s === "ON") store.commit('STATE_ON')
-        else if(s === "OFF") store.commit('STATE_OFF')
+  //      console.log('state in setHeaterState :', state)
+        if (s === 'ON') store.commit('STATE_ON')
+        else if(s === 'OFF') store.commit('STATE_OFF')
     },
 
     switchHeaterState(state, s) {
-      console.log('state in switchHeaterState :', s)
-      if (s === "OFF") store.commit('STATE_ON')
-      else if(s === "ON") store.commit('STATE_OFF')
+//      console.log('state in switchHeaterState :', s)
+      if (s === 'OFF') store.commit('STATE_ON')
+      else if(s === 'ON') store.commit('STATE_OFF')
     }
   },
   modules: {
+    timer: timerModule
   },
   strict: true
 })

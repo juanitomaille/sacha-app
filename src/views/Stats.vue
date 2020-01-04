@@ -7,7 +7,8 @@
     <v-card min-width="200">
         <v-card-title class="yellow--text">Salon</v-card-title>
         <v-card-text class="orange--text" >
-            <v-row>
+          <div v-if="(livingTemp == 99)"><v-progress-circular/></div>
+            <v-row v-else>
               <v-col align="right" class="display-3" cols="9">
                 {{livingTemp}}
               </v-col>
@@ -24,6 +25,11 @@
 
 <script>
 
+import Vue from 'vue'
+import Mqtt from '@/mqtt';
+
+Vue.use(Mqtt)
+
 export default {
 
     name:'stats',
@@ -32,33 +38,37 @@ export default {
 
     data() {
         return {
-            livingTemp: 0,
+            livingTemp: 99,
         }
     },
     mounted() {
 
-       this.updateFromMQTT()
+       this.retreiveDataFromMQTT()
     },
 
 
     methods: {
         // this app update values from MQTT
-        updateFromMQTT: function() {
+        // this app update values from MQTT
+        retreiveDataFromMQTT: function() {
 
-            /*var vueApp = this
-            // on state change of heater
+            var AppVue = this
             try {
-                uibuilder.onChange('msg', function(msg){
-                    console.log('[uibuilder.onChange] Stats from MQTT :', msg.payload)
-                    // updating var in app
-                    if (msg.payload.livingTemp) vueApp.livingTemp = parseFloat(msg.payload.livingTemp,1).toFixed(1)
 
+              Mqtt.launch('sacha-app', (topic, source) => {
+                  var _data
+                  console.log('message from MQTT : ', _data = JSON.parse('{ "topic" : "' + topic + '", "message" : "' + source + '"}'))
+                  if (_data.topic == '/home/living/temp'){
+                    AppVue.livingTemp =  parseFloat(_data.message).toFixed(1)
+                  }
                 })
-            } catch (e) {
-                // catch error in console
-                console.log("[uibuilder.onChange] stats doesn't work!");
-            }*/
-        },
+            }
+            catch (e) {
+                console.log('erreur MQTT:launch')
+            }
+
+            Mqtt.subscribe('/home/living/temp')
+        }
 
     }, // --- End of methods --- //
 

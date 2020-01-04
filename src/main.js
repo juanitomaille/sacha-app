@@ -36,7 +36,7 @@ new Vue({
 
     methods:{
         initApp: function() {
-            console.log('[indexjs:Vue.mounted] app mounted - setting up uibuilder watchers')
+            console.log('[main.js:Vue.mounted] app mounted')
 
             //start uibuilder object ton interact with node-red
 //            uibuilder.start()

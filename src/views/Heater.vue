@@ -7,7 +7,7 @@
       </v-layout>
       <v-layout justify-center align-center column>
 
-
+            <v-flex ma-12>
             <transition name="fade" mode="out-in">
               <div v-if="!getHeaterState">
                 <v-btn x-large class="greyButton"><v-progress-circular /> </v-btn>
@@ -16,6 +16,7 @@
                  <v-btn @click=switchState depressed x-large :class="[(getHeaterState == 'ON') ? 'error' : 'primary']"> {{ getHeaterState }} </v-btn>
                </div>
             </transition>
+            </v-flex>
 
 
           <v-flex mb-4>
@@ -36,7 +37,7 @@
           </v-flex>
           <v-flex>
               <v-card
-                  v-if="!showCountDown && !timerFlag"
+                  v-if="!showCountDown"
                   class="mx-auto"
                   color="darken2"
               >
@@ -44,22 +45,12 @@
                     temps écoulé depuis le dernier lancement :
                   </v-card-text>
                   <v-card-title class="justify-center">
-                      <span  :class="colorClassTime" @update-timer.prevent>
+                      <span  :class="colorClassTimer" @setTimerHistory.prevent>
                           {{lasttime.text}}
                       </span>
                   </v-card-title>
                </v-card>
-               <v-card
-                  v-else-if="!showCountDown && timerFlag"
-                  class="mx-auto"
-                  color="darken2"
-              >
-                  <v-card-text>
-                    Quelqu'un d'autre a lancé la chaudière.
-                  </v-card-text>
-               </v-card>
-
-          </v-flex>
+              </v-flex>
           <v-snackbar v-model="showAlert" color="darken4">
               Chaudière éteinte !
               <v-btn color="pink" text @click="showAlert = false">
@@ -107,14 +98,14 @@ export default {
             dateInMilliseconds: '',
             showCountDown: false,
             showAlert: false,
-            timer: false,
+            countDown: false,
 
             lasttime: {
-                text: 'non connu',
-                color:'white',
+                text: '...',
+                color:'white--text',
                 value: '1000'
             },
-            stateText: 'OFF',
+
             timerFlag: false,
 
             datas: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -122,12 +113,11 @@ export default {
     },
 
     created(){
-
+            this.retreiveDataFromMQTT()
     },
 
     mounted() {
 
-                    this.retreiveDataFromMQTT()
     },
 
 
@@ -144,23 +134,24 @@ export default {
             console.log('Button Pressed. Event DatA: ', event)
 
              this.switchHeaterState(this.getHeaterState)
-             if( Mqtt.publish('/home/heater/state',this.getHeaterState)){
-               if (this.getHeaterState === 'ON') this.startHeater()
-               else if(this.getHeaterState === 'OFF') this.stopHeater()
-             }
+
+             if (this.getHeaterState === 'ON') this.startHeater()
+             else if(this.getHeaterState === 'OFF') this.stopHeater()
+
         },
 
         startHeater: function () {
-
+            Mqtt.publish('/home/heater/state','ON')
             this.startCountDown(0,15)
-            console.log('[startHeater] state :', this.getHeaterState)
+            console.log('[startHeater] state in vuex store :', this.getHeaterState)
 
 
         },
 
         stopHeater: function() {
             this.stopCountDown()
-            Mqtt.publish('/home/heater/lastrun', this.now )
+            Mqtt.publish('/home/heater/state','OFF')
+            Mqtt.publish('/home/heater/lastrun', JSON.stringify(this.now) )
 
         },
 
@@ -169,34 +160,34 @@ export default {
             // show timer
             this.showCountDown= true
             // count every second
-            this.timer = window.setInterval(() => {
+            this.countDown = window.setInterval(() => {
                 this.now = Math.trunc((new Date()).getTime() / 1000)
                 if (this.hours == 0 && this.minutes == 0 && this.seconds == 0 )
                 {
-                    this.stopCountDown()
+                    this.stopHeater()
                 }
             },1000);
 
+            /* if countdown wasn't isset before */
+            if (!this.timerFlag){
+              this.startDate = new Date(); // fixed
+              this.now = Math.trunc((new Date()).getTime() / 1000)
+              var d = this.startDate
+              d.setMinutes(d.getMinutes() + m); // add minutes
+              d.setSeconds(d.getSeconds() + s); // add seconds
+              this.dateInMilliseconds= Math.trunc(Date.parse(d) / 1000)
+              this.$store.commit('START_TIMER', this.dateInMilliseconds)
+              Mqtt.publish('/home/heater/timer-end', JSON.stringify(this.dateInMilliseconds) )
+              console.log('[minutes] dateInMilliseconds :',this.dateInMilliseconds)
+            }
 
-            this.startDate = new Date(); // fixed
-            this.now = Math.trunc((new Date()).getTime() / 1000)
-            var d = this.startDate
-            d.setMinutes(d.getMinutes() + m); // add minutes
-            d.setSeconds(d.getSeconds() + s); // add seconds
-            this.dateInMilliseconds= Math.trunc(Date.parse(d) / 1000)
-            //console.log('[minutes] dateInMilliseconds :',this.dateInMilliseconds)
-
-  //          uibuilder.send( { 'topic': '/home/heater/timer', 'payload': '1'}) // indicate to MQTT that a timer is running
         },
 
         stopCountDown: function(){
 
             this.showCountDown = false
             this.showAlert = true
-            clearInterval(this.timer)
-
-    //        uibuilder.send( { 'topic': '/home/heater/timer', 'payload': '0'}) // indicate to MQTT that no timer run
-
+            clearInterval(this.countDown)
         },
 
         // this app update values from MQTT
@@ -207,11 +198,51 @@ export default {
 
             Mqtt.launch('sacha-app', (topic, source) => {
                 var _data
-                console.log('message: ', _data = JSON.parse('{ "topic" : "' + topic + '", "message" : "' + source + '"}'))
+                console.log('message from MQTT : ', _data = JSON.parse('{ "topic" : "' + topic + '", "message" : "' + source + '"}'))
                 if (_data.topic == '/home/heater/state'){
                   AppVue.$store.commit('SET_STATE', _data.message)
-                  console.log('store :', _data.message)
-                _data = ''
+
+                }
+                if (_data.topic == '/home/heater/lastrun'){
+
+                  var t = _data.message
+
+                   if (this.now - t < 300) {
+                      AppVue.lasttime.text = " < 5 minutes"
+                      AppVue.lasttime.color = "pink--text"
+                  }
+                  else if(this.now - t > 300 && this.now - t < 3600) {
+                      AppVue.lasttime.text = " < 1 heure"
+                      AppVue.lasttime.color = "orange--text"
+                  }
+                  else if(this.now - t > 3600) {
+                      AppVue.lasttime.text = " +1 heure"
+                      AppVue.lasttime.color = "green--text"
+                  }
+                  AppVue.lasttime.value =  _data.message
+                  //console.log('lasttime: ', AppVue.lasttime)
+                }
+                if (_data.topic == '/home/heater/timer-end'){
+                  //AppVue.$store.commit('START_TIMER', _data.message)
+
+                  var timeNow = new Date();
+                  timeNow = Date.parse(timeNow)/1000
+                  console.log('[mounted]time left :',this.getTimerEnd - timeNow);
+
+                  /* If a countdown was previously isset or isset by another client */
+                  if (this.getTimerEnd > timeNow) {
+
+
+                    var timeRemaining = this.getTimerEnd - timeNow
+                    console.log('[reload Timer]', timeRemaining);
+                    var s = timeRemaining % 60;
+
+                    var m = Math.trunc(timeRemaining / 60) % 60;
+
+                    this.startCountDown(m,s)
+                    this.timerFlag = true
+                  }
+
                 }
               })
           }
@@ -221,27 +252,33 @@ export default {
 
           Mqtt.subscribe('/home/heater/state')
           Mqtt.subscribe('/home/heater/lastrun')
-
+          Mqtt.subscribe('/home/heater/timer-end')
 
 
                     // updating var in app
                     // topic == '/home/heater/stats') vueApp.datas = msg.payload
-                    // vueApp.update( (msg.payload.state == "ON") ? true : false )
-                    // lasttime.value = msg.payload.lastRun
-                    // timer = (msg.payload.timer == '1') ? true : false
 
         },
 
 
     }, // --- End of methods --- //
+    watch : {
 
+      setTimerHistory() {
+
+
+      },
+    },
     computed: {
 
       ...mapGetters({
-        getHeaterState: 'getHeaterState'
+        getHeaterState: 'getHeaterState',
+        getTimerEnd: 'getEndTime'
       }),
 
-
+      colorClassTimer() {
+        return this.lasttime.color
+      },
 
 
         seconds() {
@@ -257,38 +294,11 @@ export default {
           return Math.trunc((this.dateInMilliseconds - this.now) / 60 / 60 / 24);
         },
 
-        colorClassTime() {
 
-      //      var v = this.lasttime.value
-
-/*
-
-            if (this.showCountDown === false && this.timer === true) {
-                this.lasttime.text = "Un autre l'a lancé !"
-                this.lasttime.color = "red--text"
-            }
-            else if (this.now - v < 300) {
-                this.lasttime.text = " < 5 minutes"
-                this.lasttime.color = "pink--text"
-            }
-            else if(this.now - v > 300 && this.now - v < 3600) {
-                this.lasttime.text = " < 1 heure"
-                this.lasttime.color = "orange--text"
-            }
-            else if(this.now - v > 3600) {
-                this.lasttime.text = " +1 heure"
-                this.lasttime.color = "green--text"
-            }
-
-            return this.lasttime.color;
-            */
-
-            return "orange--text"
-        },
 
     },
     beforeDestroy(){
-        clearInterval(this.timer)
+        clearInterval(this.countDown)
     }
 }
 </script>
