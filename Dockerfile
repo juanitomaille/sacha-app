@@ -8,10 +8,10 @@ RUN npm install -g http-server
 WORKDIR /app
 
 # ajoute `/app/node_modules/.bin` to $PATH
-#ENV PATH /app/node_modules/.bin:$PATH
+ENV PATH /app/node_modules/.bin:$PATH
 
 # copie 'package.json' et 'package-lock.json' (si disponible)
-COPY package.json ./
+COPY package.json /app/package.json
 
 # installe les dépendances du projet
 RUN npm install
@@ -19,13 +19,13 @@ RUN npm install
 #RUN npm install @vue/cli@4.1.2 -g
 
 # copie les fichiers et dossiers du projet dans le dossier de travail (par exemple : le dossier 'app')
-COPY . .
+COPY . /app
 
 # start app
 #CMD ["npm", "run", "serve"]
 
 # construit l'app pour la production en la minifiant
-RUN npm run build
+#RUN npm run build
 
 EXPOSE 8080
 CMD [ "http-server", "dist" ]
