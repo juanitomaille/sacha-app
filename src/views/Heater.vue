@@ -131,7 +131,7 @@ export default {
 
         switchState: function(event) {
 
-            console.log('Button Pressed. Event DatA: ', event)
+            window.console.log('Button Pressed. Event DatA: ', event)
 
              this.switchHeaterState(this.getHeaterState)
 
@@ -143,7 +143,7 @@ export default {
         startHeater: function () {
             Mqtt.publish('/home/heater/state','ON')
             this.startCountDown(0,15)
-            console.log('[startHeater] state in vuex store :', this.getHeaterState)
+            window.console.log('[startHeater] state in vuex store :', this.getHeaterState)
 
 
         },
@@ -178,7 +178,7 @@ export default {
               this.dateInMilliseconds= Math.trunc(Date.parse(d) / 1000)
               this.$store.commit('START_TIMER', this.dateInMilliseconds)
               Mqtt.publish('/home/heater/timer-end', JSON.stringify(this.dateInMilliseconds) )
-              console.log('[minutes] dateInMilliseconds :',this.dateInMilliseconds)
+              window.console.log('[minutes] dateInMilliseconds :',this.dateInMilliseconds)
             }
 
         },
@@ -198,7 +198,7 @@ export default {
 
             Mqtt.launch('sacha-app', (topic, source) => {
                 var _data
-                console.log('message from MQTT : ', _data = JSON.parse('{ "topic" : "' + topic + '", "message" : "' + source + '"}'))
+                window.console.log('message from MQTT : ', _data = JSON.parse('{ "topic" : "' + topic + '", "message" : "' + source + '"}'))
                 if (_data.topic == '/home/heater/state'){
                   AppVue.$store.commit('SET_STATE', _data.message)
 
@@ -220,21 +220,21 @@ export default {
                       AppVue.lasttime.color = "green--text"
                   }
                   AppVue.lasttime.value =  _data.message
-                  //console.log('lasttime: ', AppVue.lasttime)
+                  window.console.log('lasttime: ', AppVue.lasttime)
                 }
                 if (_data.topic == '/home/heater/timer-end'){
                   //AppVue.$store.commit('START_TIMER', _data.message)
 
                   var timeNow = new Date();
                   timeNow = Date.parse(timeNow)/1000
-                  console.log('[mounted]time left :',this.getTimerEnd - timeNow);
+                  window.console.log('[mounted]time left :',this.getTimerEnd - timeNow);
 
                   /* If a countdown was previously isset or isset by another client */
                   if (this.getTimerEnd > timeNow) {
 
 
                     var timeRemaining = this.getTimerEnd - timeNow
-                    console.log('[reload Timer]', timeRemaining);
+                    window.console.log('[reload Timer]', timeRemaining);
                     var s = timeRemaining % 60;
 
                     var m = Math.trunc(timeRemaining / 60) % 60;
@@ -247,7 +247,7 @@ export default {
               })
           }
           catch (e) {
-              console.log('erreur MQTT:launch')
+              window.console.log('erreur MQTT:launch')
           }
 
           Mqtt.subscribe('/home/heater/state')

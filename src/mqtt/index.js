@@ -20,16 +20,16 @@ export default {
   },
   subscribe(topic) {
     client.subscribe(topic, {qos: 1})
-    console.log('subscribe:', topic)
+    window.console.log('subscribe:', topic)
   },
   publish(topic, message) {
-    console.log()
+    window.console.log()
     client.publish(topic, message, {qos: 1, retain: true}, function (err) {
       if (!err)  {
-        console.log('MQTT published on topic :', topic)
+        window.console.log('MQTT published on topic :', topic)
         return true
       }
-      else console.log('Error on MQTT publish on topic :', topic )
+      else window.console.log('Error on MQTT publish on topic :', topic )
 
     })
 

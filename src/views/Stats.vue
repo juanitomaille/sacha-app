@@ -57,14 +57,14 @@ export default {
 
               Mqtt.launch('sacha-app', (topic, source) => {
                   var _data
-                  console.log('message from MQTT : ', _data = JSON.parse('{ "topic" : "' + topic + '", "message" : "' + source + '"}'))
+                  window.console.log('message from MQTT : ', _data = JSON.parse('{ "topic" : "' + topic + '", "message" : "' + source + '"}'))
                   if (_data.topic == '/home/living/temp'){
                     AppVue.livingTemp =  parseFloat(_data.message).toFixed(1)
                   }
                 })
             }
             catch (e) {
-                console.log('erreur MQTT:launch')
+                window.console.log('erreur MQTT:launch')
             }
 
             Mqtt.subscribe('/home/living/temp')
