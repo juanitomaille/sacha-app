@@ -3,6 +3,7 @@ module.exports = {
     "vuetify"
   ],
   devServer: {
-    public: 'sachat.seed.fr.nf:80'
-  }
+    public: 'sachat.seed.fr.nf',
+    proxy: 'https://lcalhost:8080',
+  },
 }
