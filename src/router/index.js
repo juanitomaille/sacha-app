@@ -20,10 +20,6 @@ const routes =  [
         path: '/settings',
         name: 'Settings',
         component: () => import(/* webpackChunkName: "Settings" */ '../views/Settings.vue'),
-    },
-    {
-        path:'*',
-        redirect: '/home'
     }]
 
 const router = new VueRouter({

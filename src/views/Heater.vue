@@ -109,11 +109,29 @@ export default {
             timerFlag: false,
 
             datas: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+
+            mqttDatas :{
+              state: {
+                topic: '/home/heater/state',
+                message: '',
+              },
+              lastRun: {
+                topic: '/home/heater/lastrun',
+                message: '',
+              },
+              timerEnd: {
+                topic: '/home/heater/timer-end',
+                message: '',
+              },
+            }
+
         }
     },
 
     created(){
-            this.retreiveDataFromMQTT()
+            for (const _mqtt in this.mqttDatas){
+            Mqtt.subscribe(this.mqttDatas[_mqtt].topic)
+            }
     },
 
     mounted() {
@@ -194,14 +212,17 @@ export default {
         retreiveDataFromMQTT: function() {
 
           var AppVue = this
+
+
+
           try {
 
             Mqtt.launch('sacha-app', (topic, source) => {
                 var _data
                 window.console.log('message from MQTT : ', _data = JSON.parse('{ "topic" : "' + topic + '", "message" : "' + source + '"}'))
+
                 if (_data.topic == '/home/heater/state'){
                   AppVue.$store.commit('SET_STATE', _data.message)
-
                 }
                 if (_data.topic == '/home/heater/lastrun'){
 
@@ -249,15 +270,6 @@ export default {
           catch (e) {
               window.console.log('erreur MQTT:launch')
           }
-
-          Mqtt.subscribe('/home/heater/state')
-          Mqtt.subscribe('/home/heater/lastrun')
-          Mqtt.subscribe('/home/heater/timer-end')
-
-
-                    // updating var in app
-                    // topic == '/home/heater/stats') vueApp.datas = msg.payload
-
         },
 
 

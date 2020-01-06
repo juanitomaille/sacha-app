@@ -4,8 +4,9 @@ import './registerServiceWorker'
 import router from './router'
 import store from './store'
 import vuetify from './plugins/vuetify';
+import Mqtt from '@/mqtt';
 
-
+Vue.use(Mqtt)
 
 Vue.config.productionTip = false
 
@@ -22,30 +23,14 @@ Vue.filter('two_digits', (value) => {
 
 
 new Vue({
-    el: '#app',
-    router,
-    store,
-    vuetify,
-    render: h => h(App),
+  el: '#app',
+  router,
+  store,
+  vuetify,
+  render: h => h(App),
 
-    mounted(){
-
-        this.initApp()
-
-    },
-
-    methods:{
-        initApp: function() {
-            window.console.log('[main.js:Vue.mounted] app mounted')
-
-            //start uibuilder object ton interact with node-red
-//            uibuilder.start()
-
-            // send a poke to node-red to trigger updated values at launch
-//            uibuilder.send( { 'topic': 'stateRequest', 'payload': 'stateRequest'})
-        },
-
-
-    }
-
-}).$mount('#app')
+  mounted(){
+    Mqtt.launch('sacha-app')
+    window.console.log('[main.js:Vue.mounted] app mounted')
+  }
+})

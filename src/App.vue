@@ -5,9 +5,7 @@
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title>Chez Sachat</v-toolbar-title>
 
-
       <v-spacer></v-spacer>
-
 
       <v-btn icon>
         <v-icon>mdi-magnify</v-icon>
@@ -87,7 +85,7 @@
 
 <script>
 export default {
-  data () {
+  data() {
     return {
       drawer: false,
     }

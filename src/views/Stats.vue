@@ -44,6 +44,7 @@ export default {
     mounted() {
 
        this.retreiveDataFromMQTT()
+       Mqtt.subscribe('/home/living/temp')
     },
 
 
@@ -66,8 +67,6 @@ export default {
             catch (e) {
                 window.console.log('erreur MQTT:launch')
             }
-
-            Mqtt.subscribe('/home/living/temp')
         }
 
     }, // --- End of methods --- //
