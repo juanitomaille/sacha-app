@@ -73,16 +73,25 @@
 </template>
 
 <script>
-
 import Vue from 'vue'
 import {mapGetters} from 'vuex'
 import {mapActions} from 'vuex'
 import Bars from 'vuebars';
-import Mqtt from '@/mqtt';
+import VueMqtt from 'vue-mqtt'
+
+
+Vue.use(VueMqtt,
+        'wss://mqtt.seed.fr.nf:8886',
+        {
+          path: '/mqtt',
+          clientId: 'Sachat-app',
+          protocolId: 'MQTT',
+          protocolVersion: 4
+        })
+
 
 
 Vue.use(Bars)
-Vue.use(Mqtt)
 
 export default {
 
@@ -110,34 +119,55 @@ export default {
 
             datas: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 
-            mqttDatas :{
-              state: {
-                topic: '/home/heater/state',
-                message: '',
-              },
-              lastRun: {
-                topic: '/home/heater/lastrun',
-                message: '',
-              },
-              timerEnd: {
-                topic: '/home/heater/timer-end',
-                message: '',
-              },
-            }
-
         }
     },
 
-    created(){
-            for (const _mqtt in this.mqttDatas){
-            Mqtt.subscribe(this.mqttDatas[_mqtt].topic)
-            }
+    mqtt: {
+      'home/heater/state'(data){
+        this.$store.commit('SET_STATE', data)
+      },
+
+      'home/heater/lastrun'(data){
+        var t = this.now - data
+
+         if (t < 300) {
+            this.lasttime.text = " < 5 minutes"
+            this.lasttime.color = "pink--text"
+        }
+        else if(t > 300 && t < 3600) {
+            this.lasttime.text = " < 1 heure"
+            this.lasttime.color = "orange--text"
+        }
+        else if(t > 3600) {
+            this.lasttime.text = " +1 heure"
+            this.lasttime.color = "green--text"
+        }
+        this.lasttime.value =  data
+        window.console.log('lasttime: ', this.lasttime)
+      },
+
+      'home/heater/timer-end'(data){
+        var timeNow = new Date();
+        timeNow = Date.parse(timeNow)/1000
+        window.console.log('[mounted]time left :',data - timeNow);
+
+        /* If a countdown was previously isset or isset by another client */
+        if (data > timeNow) {
+
+
+          var timeRemaining = data - timeNow
+          window.console.log('[reload Timer]', timeRemaining);
+          var s = timeRemaining % 60;
+
+          var m = Math.trunc(timeRemaining / 60) % 60;
+
+          this.startCountDown(m,s)
+          this.timerFlag = true
+        }
+      }
+
+
     },
-
-    mounted() {
-
-    },
-
 
     methods: {
 
@@ -145,6 +175,13 @@ export default {
         switchHeaterState : 'switchHeaterState',
         setHeaterState : 'setHeaterState'
       }),
+
+
+      startHeater: function() {
+          this.$mqtt.publish('home/heater/state','ON')
+          this.startCountDown(0,15)
+          window.console.log('[startHeater] state in vuex store :', this.getHeaterState)
+      },
 
 
         switchState: function(event) {
@@ -158,18 +195,10 @@ export default {
 
         },
 
-        startHeater: function () {
-            Mqtt.publish('/home/heater/state','ON')
-            this.startCountDown(0,15)
-            window.console.log('[startHeater] state in vuex store :', this.getHeaterState)
-
-
-        },
-
         stopHeater: function() {
             this.stopCountDown()
-            Mqtt.publish('/home/heater/state','OFF')
-            Mqtt.publish('/home/heater/lastrun', JSON.stringify(this.now) )
+            this.$mqtt.publish('home/heater/state','OFF')
+            this.$mqtt.publish('home/heater/lastrun', JSON.stringify(this.now) )
 
         },
 
@@ -195,7 +224,7 @@ export default {
               d.setSeconds(d.getSeconds() + s); // add seconds
               this.dateInMilliseconds= Math.trunc(Date.parse(d) / 1000)
               this.$store.commit('START_TIMER', this.dateInMilliseconds)
-              Mqtt.publish('/home/heater/timer-end', JSON.stringify(this.dateInMilliseconds) )
+              this.$mqtt.publish('home/heater/timer-end', JSON.stringify(this.dateInMilliseconds) )
               window.console.log('[minutes] dateInMilliseconds :',this.dateInMilliseconds)
             }
 
@@ -207,71 +236,6 @@ export default {
             this.showAlert = true
             clearInterval(this.countDown)
         },
-
-        // this app update values from MQTT
-        retreiveDataFromMQTT: function() {
-
-          var AppVue = this
-
-
-
-          try {
-
-            Mqtt.launch('sacha-app', (topic, source) => {
-                var _data
-                window.console.log('message from MQTT : ', _data = JSON.parse('{ "topic" : "' + topic + '", "message" : "' + source + '"}'))
-
-                if (_data.topic == '/home/heater/state'){
-                  AppVue.$store.commit('SET_STATE', _data.message)
-                }
-                if (_data.topic == '/home/heater/lastrun'){
-
-                  var t = _data.message
-
-                   if (this.now - t < 300) {
-                      AppVue.lasttime.text = " < 5 minutes"
-                      AppVue.lasttime.color = "pink--text"
-                  }
-                  else if(this.now - t > 300 && this.now - t < 3600) {
-                      AppVue.lasttime.text = " < 1 heure"
-                      AppVue.lasttime.color = "orange--text"
-                  }
-                  else if(this.now - t > 3600) {
-                      AppVue.lasttime.text = " +1 heure"
-                      AppVue.lasttime.color = "green--text"
-                  }
-                  AppVue.lasttime.value =  _data.message
-                  window.console.log('lasttime: ', AppVue.lasttime)
-                }
-                if (_data.topic == '/home/heater/timer-end'){
-                  //AppVue.$store.commit('START_TIMER', _data.message)
-
-                  var timeNow = new Date();
-                  timeNow = Date.parse(timeNow)/1000
-                  window.console.log('[mounted]time left :',this.getTimerEnd - timeNow);
-
-                  /* If a countdown was previously isset or isset by another client */
-                  if (this.getTimerEnd > timeNow) {
-
-
-                    var timeRemaining = this.getTimerEnd - timeNow
-                    window.console.log('[reload Timer]', timeRemaining);
-                    var s = timeRemaining % 60;
-
-                    var m = Math.trunc(timeRemaining / 60) % 60;
-
-                    this.startCountDown(m,s)
-                    this.timerFlag = true
-                  }
-
-                }
-              })
-          }
-          catch (e) {
-              window.console.log('erreur MQTT:launch')
-          }
-        },
-
 
     }, // --- End of methods --- //
     watch : {

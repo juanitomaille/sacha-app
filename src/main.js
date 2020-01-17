@@ -3,10 +3,7 @@ import App from './App.vue'
 import './registerServiceWorker'
 import router from './router'
 import store from './store'
-import vuetify from './plugins/vuetify';
-import Mqtt from '@/mqtt';
-
-Vue.use(Mqtt)
+import vuetify from './plugins/vuetify'
 
 Vue.config.productionTip = false
 
@@ -27,10 +24,5 @@ new Vue({
   router,
   store,
   vuetify,
-  render: h => h(App),
-
-  mounted(){
-    Mqtt.launch('sacha-app')
-    window.console.log('[main.js:Vue.mounted] app mounted')
-  }
+  render: h => h(App)
 })

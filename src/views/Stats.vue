@@ -24,11 +24,20 @@
 </template>
 
 <script>
+  import Vue from 'vue'
+  import VueMqtt from 'vue-mqtt'
 
-import Vue from 'vue'
-import Mqtt from '@/mqtt';
 
-Vue.use(Mqtt)
+  Vue.use(VueMqtt,
+          'wss://mqtt.seed.fr.nf:8886',
+          {
+            path: '/mqtt',
+            clientId: 'Sachat-app',
+            protocolId: 'MQTT',
+            protocolVersion: 4
+          })
+
+
 
 export default {
 
@@ -41,41 +50,23 @@ export default {
             livingTemp: 99,
         }
     },
-    mounted() {
 
-       this.retreiveDataFromMQTT()
-       Mqtt.subscribe('/home/living/temp')
+    mqtt:{
+      'home/living/temp'(data, topic) {
+      window.console.log(topic + ': ' + String.fromCharCode.apply(null, data))
+      this.livingTemp =  parseFloat(data).toFixed(1)
+      },
     },
 
+    mounted() {
+      this.$mqtt.subscribe('home/living/temp')
+    },
 
     methods: {
-        // this app update values from MQTT
-        // this app update values from MQTT
-        retreiveDataFromMQTT: function() {
-
-            var AppVue = this
-            try {
-
-              Mqtt.launch('sacha-app', (topic, source) => {
-                  var _data
-                  window.console.log('message from MQTT : ', _data = JSON.parse('{ "topic" : "' + topic + '", "message" : "' + source + '"}'))
-                  if (_data.topic == '/home/living/temp'){
-                    AppVue.livingTemp =  parseFloat(_data.message).toFixed(1)
-                  }
-                })
-            }
-            catch (e) {
-                window.console.log('erreur MQTT:launch')
-            }
-        }
 
     }, // --- End of methods --- //
 
     computed: {
-
-    },
-
-    beforeDestroy(){
 
     }
 }
