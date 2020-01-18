@@ -57,7 +57,7 @@
       </v-list>
     </v-navigation-drawer>
     <v-content>
-      <v-container>
+      <v-container fluid p0>
         <v-fade-transition mode="out-in">
           <router-view></router-view>
         </v-fade-transition>
@@ -161,9 +161,5 @@ export default {
   font-family: 'Roboto', serif;
   margin: 5px;
   text-align: center;
-}
-
-.v-card {
-  color: darken2;
 }
 </style>
