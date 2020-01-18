@@ -125,7 +125,7 @@ export default {
     mqtt: {
       'home/heater/state'(data){
         this.setHeaterState(String.fromCharCode.apply(null, data))
-        console.log(String.fromCharCode.apply(null, data))
+        window.console.log(String.fromCharCode.apply(null, data))
       },
 
       'home/heater/lastrun'(data){
