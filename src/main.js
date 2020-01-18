@@ -4,8 +4,17 @@ import './registerServiceWorker'
 import router from './router'
 import store from './store'
 import vuetify from './plugins/vuetify'
+import VueMqtt from 'vue-mqtt'
 
-Vue.config.productionTip = false
+
+Vue.use(VueMqtt,
+        'wss://mqtt.seed.fr.nf:8886',
+        {
+          clientId: 'Sachat-app',
+          protocolId: 'MQTT',
+          protocolVersion: 4
+        })
+//Vue.config.productionTip = false
 
 // valable pour le countdown
 Vue.filter('two_digits', (value) => {
@@ -19,10 +28,16 @@ Vue.filter('two_digits', (value) => {
 });
 
 
+
+
 new Vue({
   el: '#app',
   router,
   store,
   vuetify,
-  render: h => h(App)
+  render: h => h(App),
+
+  mounted() {
+      this.$mqtt.subscribe('home/#')
+  }
 })

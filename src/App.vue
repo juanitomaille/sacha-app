@@ -11,20 +11,6 @@
         <v-icon>mdi-magnify</v-icon>
       </v-btn>
 
-      <v-menu left bottom>
-        <template v-slot:activator="{ on }" color="darken1">
-          <v-btn icon v-on="on">
-            <v-icon>mdi-dots-vertical</v-icon>
-          </v-btn>
-        </template>
-
-        <v-list color="darken1">
-          <v-list-item v-for="n in 5" :key="n" @click="() => {}">
-            <v-list-item-title>Option {{ n }}</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-
 
     </v-app-bar>
     <v-navigation-drawer app clipped v-model="drawer" color="darken1">
@@ -104,7 +90,7 @@ export default {
  *    [v-cloak] > * { display:none }
  *    [v-cloak]::before { content: "loading…" }
  */
-[v-cloak]>* {
+[v-cloak] > * {
   display: none;
 }
 
@@ -133,13 +119,6 @@ export default {
 
 .syntax-highlight>.boolean {
   color: #b993ff;
-}
-
-
-
-
-.hello {
-  transform: rotate(30 20, 40);
 }
 
 

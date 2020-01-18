@@ -24,18 +24,7 @@
 </template>
 
 <script>
-  import Vue from 'vue'
-  import VueMqtt from 'vue-mqtt'
 
-
-  Vue.use(VueMqtt,
-          'wss://mqtt.seed.fr.nf:8886',
-          {
-            path: '/mqtt',
-            clientId: 'Sachat-app',
-            protocolId: 'MQTT',
-            protocolVersion: 4
-          })
 
 
 
@@ -59,7 +48,7 @@ export default {
     },
 
     mounted() {
-      this.$mqtt.subscribe('home/living/temp')
+
     },
 
     methods: {

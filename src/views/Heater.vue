@@ -124,7 +124,8 @@ export default {
 
     mqtt: {
       'home/heater/state'(data){
-        this.$store.commit('SET_STATE', data)
+        this.setHeaterState(String.fromCharCode.apply(null, data))
+        console.log(String.fromCharCode.apply(null, data))
       },
 
       'home/heater/lastrun'(data){
@@ -167,6 +168,10 @@ export default {
       }
 
 
+    },
+
+    mounted() {
+      this.$mqtt.subscribe('home/heater/#')
     },
 
     methods: {
@@ -238,13 +243,7 @@ export default {
         },
 
     }, // --- End of methods --- //
-    watch : {
 
-      setTimerHistory() {
-
-
-      },
-    },
     computed: {
 
       ...mapGetters({
