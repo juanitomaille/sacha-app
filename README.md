@@ -24,3 +24,7 @@ sudo docker build -t username/sachat-app:dev .
 ```
 sudo docker push juanitomaille/sachat-app:dev
 ```
+generate icons for app :
+
+https://code.luasoftware.com/tutorials/vuejs/vuejs-pwa-manifest-icons-and-favicon/
+https://realfavicongenerator.net/
