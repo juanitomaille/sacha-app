@@ -90,7 +90,7 @@ export default {
  *    [v-cloak] > * { display:none }
  *    [v-cloak]::before { content: "loading…" }
  */
-[v-cloak] > * {
+[v-cloak]>* {
   display: none;
 }
 
@@ -161,5 +161,9 @@ export default {
   font-family: 'Roboto', serif;
   margin: 5px;
   text-align: center;
+}
+
+.v-card {
+  color: darken2;
 }
 </style>
