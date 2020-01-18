@@ -1,7 +1,7 @@
 # sachat-app
 
 dependencies : Vuetify, Router, Vuex.
-Plugins : Vuebars.
+Plugins : Vuebars, vue-mqtt
 
 ## Project setup
 ```
@@ -14,10 +14,17 @@ npm i vuebars -S
 npm run serve
 ```
 
-### Compiles and minifies for production
+
+### create docker image
 ```
-npm run build
+sudo docker build -t username/sachat-app:dev .
 ```
+
+### Push docker image por production
+```
+sudo docker push juanitomaille/sachat-app:dev
+```
+
 
 ### Lints and fixes files
 ```
