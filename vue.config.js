@@ -2,6 +2,7 @@ module.exports = {
   "transpileDependencies": [
     "vuetify"
   ],
+
   devServer: {
     disableHostCheck: true,
     //public: 'sachat.seed.fr.nf',
