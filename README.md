@@ -32,3 +32,23 @@ https://realfavicongenerator.net/
 Authentification inspiration :
 
 https://blog.sqreen.com/authentication-best-practices-vue/
+
+Google Calendar integration :
+
+https://forum.vuejs.org/t/how-to-integrate-google-calendar/31218
+
+
+Add a config file named vars.js inside utils/ :
+
+```
+/* heater view */
+export const MQTT_SERVER = 'wss://your_server:your_port';
+export const APP_NAME = 'your-app';
+
+
+/* calendar view */
+// Client ID and API key from the Google Developer Console
+export const CLIENT_ID = 'your_client_id';
+export const API_KEY = 'your_token';
+export const CALENDAR_ID = 'your_calendar_id';
+```

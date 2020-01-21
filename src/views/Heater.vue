@@ -77,13 +77,14 @@ import Vue from 'vue'
 import {mapGetters, mapActions} from 'vuex'
 import Bars from 'vuebars';
 import VueMqtt from 'vue-mqtt'
+import {MQTT_SERVER, APP_NAME} from '@/utils/vars'
 
 
 Vue.use(VueMqtt,
-        'wss://mqtt.seed.fr.nf:8886',
+        MQTT_SERVER,
         {
           path: '/mqtt',
-          clientId: 'Sachat-app',
+          clientId: APP_NAME,
           protocolId: 'MQTT',
           protocolVersion: 4
         })

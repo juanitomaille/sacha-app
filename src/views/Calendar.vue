@@ -16,14 +16,8 @@
 </div>
 </template>
 
-<script async defer src="https://apis.google.com/js/api.js">
-</script>
-
 <script>
 
-// Client ID and API key from the Developer Console
-const CLIENT_ID = '760314404073-3gcmljcjto1vn9n7avnl7rhlhgg9n036.apps.googleusercontent.com';
-const API_KEY = 'AIzaSyCChW0IDE3DlcuJwxhmuUtRHsX_DM2iIW8';
 // Array of API discovery doc URLs for APIs used by the quickstart
 const DISCOVERY_DOCS = ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'];
 // Authorization scopes required by the API; multiple scopes can be
@@ -31,6 +25,7 @@ const DISCOVERY_DOCS = ['https://www.googleapis.com/discovery/v1/apis/calendar/v
 const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
 
 import '@/utils/gapi.js'
+import {API_KEY, CLIENT_ID} from '@/utils/vars'
 
 export default {
     name: "calendar",
@@ -102,7 +97,7 @@ export default {
         let vm = this;
 
         vm.api.client.calendar.events.list({
-          'calendarId': 'primary',
+          'calendarId': CALENDAR_ID,
           'timeMin': (new Date()).toISOString(),
           'showDeleted': false,
           'singleEvents': true,

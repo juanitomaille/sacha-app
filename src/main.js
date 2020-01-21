@@ -7,6 +7,7 @@ import store from './store'
 import vuetify from './plugins/vuetify'
 import VueMqtt from 'vue-mqtt'
 import axios from 'axios'
+import {MQTT_SERVER, APP_NAME} from '@/utils/vars'
 
 
 
@@ -16,9 +17,9 @@ if (token) {
 }
 
 Vue.use(VueMqtt,
-        'wss://mqtt.seed.fr.nf:8886',
+        MQTT_SERVER,
         {
-          clientId: 'Sachat-app',
+          clientId: APP_NAME,
           protocolId: 'MQTT',
           protocolVersion: 4
         })
