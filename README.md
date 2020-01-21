@@ -1,12 +1,13 @@
 # sachat-app
 
 dependencies : Vuetify, Router, Vuex.
-Plugins : Vuebars, vue-mqtt
+Plugins : Vuebars, vue-mqtt, axios
 
 ## Project setup
 ```
-
 npm i vuebars -S
+npm install --save vue-mqtt
+npm install --save axios
 ```
 
 ### Compiles and hot-reloads for development
@@ -22,7 +23,7 @@ sudo docker build -t username/sachat-app:dev .
 
 ### Push docker image por production
 ```
-sudo docker push juanitomaille/sachat-app:dev
+sudo docker push username/sachat-app:dev
 ```
 generate icons for app :
 
@@ -48,6 +49,7 @@ export const APP_NAME = 'your-app';
 
 /* calendar view */
 // Client ID and API key from the Google Developer Console
+// https://developers.google.com/calendar/quickstart/js
 export const CLIENT_ID = 'your_client_id';
 export const API_KEY = 'your_token';
 export const CALENDAR_ID = 'your_calendar_id';

@@ -16,6 +16,8 @@
 </div>
 </template>
 
+<script type="text/javascript" src="https://apis.google.com/js/api.js"></script>
+
 <script>
 
 // Array of API discovery doc URLs for APIs used by the quickstart
@@ -25,7 +27,7 @@ const DISCOVERY_DOCS = ['https://www.googleapis.com/discovery/v1/apis/calendar/v
 const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
 
 import '@/utils/gapi.js'
-import {API_KEY, CLIENT_ID} from '@/utils/vars'
+import {API_KEY, CLIENT_ID, CALENDAR_ID} from '@/config.js'
 
 export default {
     name: "calendar",
@@ -105,7 +107,7 @@ export default {
           'orderBy': 'startTime'
         }).then(response => {
           vm.items = this.syntaxHighlight(response.result.items);
-          console.log(vm.items);
+            window.console.log(vm.items);
         });
       },
 

@@ -7,7 +7,7 @@ import store from './store'
 import vuetify from './plugins/vuetify'
 import VueMqtt from 'vue-mqtt'
 import axios from 'axios'
-import {MQTT_SERVER, APP_NAME} from '@/utils/vars'
+import {MQTT_SERVER, APP_NAME} from '@/config.js'
 
 
 
