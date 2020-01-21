@@ -49,13 +49,16 @@ Add a config file named config.js inside src/ :
 
 ```
 /* heater view */
-export const MQTT_SERVER = 'wss://your_server:your_port';
 export const APP_NAME = 'your-app';
+
+export const MQTT_SERVER = 'wss://your_server.tld:your_port';
+export const MQTT_USER = 'user';
+export const MQTT_PASSWORD = 'pass';
 
 
 /* calendar view */
 // Client ID and API key from the Google Developer Console
-// https://developers.google.com/calendar/quickstart/js
+// go to https://developers.google.com/calendar/quickstart/js
 export const CLIENT_ID = 'your_client_id';
 export const API_KEY = 'your_token';
 export const CALENDAR_ID = 'your_calendar_id';
