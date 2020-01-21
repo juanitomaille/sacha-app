@@ -1,4 +1,10 @@
-# sachat-app
+# Sachat-app
+
+Sachat, it's the name of my cat.
+He keeps my home warm by powering our heater system.
+He can do that when i poke him or with a google calendar connexion (A fresh calendar named Heater with any event)
+
+It's a Work in progress but you can install it in a docker container...at your own risk !
 
 dependencies : Vuetify, Router, Vuex.
 Plugins : Vuebars, vue-mqtt, axios
@@ -39,7 +45,7 @@ Google Calendar integration :
 https://forum.vuejs.org/t/how-to-integrate-google-calendar/31218
 
 
-Add a config file named vars.js inside utils/ :
+Add a config file named config.js inside src/ :
 
 ```
 /* heater view */
