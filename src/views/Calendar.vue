@@ -1,19 +1,61 @@
 <template>
   <div class="Calendar">
+    <h2>Calendrier</h2>
+    <div class='authentification'>
+      <v-btn v-if='!authorized' @click="handleAuthClick" depressed small class="primary"> Connection </v-btn>
+    </div>
+    <hr>
 
-  <div class='authentification'>
-  <h2>VueJS + Google Calendar Example</h2>
-  Authentification
-  <button v-if='!authorized' @click="handleAuthClick">Sign In</button>
-  <button v-if='authorized' @click="handleSignoutClick">Sign Out</button>
-</div>
-<hr>
-<button v-if='authorized' @click="getData">Get Data</button>
-<div class="item-container" v-if="authorized && items">
-  <pre v-html="items"></pre>
-</div>
 
-</div>
+
+
+    <div>
+    <v-sheet
+      tile
+      height="45"
+      color="darken2"
+      class="d-flex"
+    >
+      <v-btn
+        icon
+        class="ma-2"
+        @click="$refs.calendar.prev()"
+      >
+        <v-icon>mdi-chevron-left</v-icon>
+      </v-btn>
+
+      <v-spacer></v-spacer>
+      <v-btn
+        icon
+        class="ma-2"
+        @click="$refs.calendar.next()"
+      >
+        <v-icon>mdi-chevron-right</v-icon>
+      </v-btn>
+    </v-sheet>
+    <v-sheet height="600">
+      <v-calendar
+        id="calendar"
+        dark
+        ref="calendar"
+        interval-height="30"
+        v-model="value"
+        :weekdays="weekday"
+        :type="type"
+        :events="events"
+        :event-overlap-mode="mode"
+        :event-overlap-threshold="30"
+        :event-color="getEventColor"
+        @change="getEvents"
+      ></v-calendar>
+    </v-sheet>
+  </div>
+
+
+
+
+
+  </div>
 </template>
 
 <script type="text/javascript" src="https://apis.google.com/js/api.js"></script>
@@ -33,9 +75,19 @@ export default {
     name: "calendar",
     data() {
       return {
+        /* for google API */
         items: undefined,
         api: undefined,
-        authorized: false
+        authorized: false,
+
+        /* for calendar viewing */
+        type: '4day',
+        mode: 'stack',
+        weekday: [1, 2, 3, 4, 5, 6, 0],
+        value: '',
+        events: [],
+        colors: ['blue', 'indigo', 'deep-purple', 'cyan', 'green', 'orange', 'grey darken-1'],
+        names: ['Meeting', 'Holiday', 'PTO', 'Travel', 'Event', 'Birthday', 'Conference', 'Party'],
       }
     },
 
@@ -44,16 +96,44 @@ export default {
       this.handleClientLoad();
     },
 
+    mounted(){
+
+
+
+    },
+
+    watch: {
+      authorized: function() {
+        let vm = this;
+
+        vm.api.client.calendar.events.list({
+          'calendarId': CALENDAR_ID,
+          'timeMin': (new Date()).toISOString(),
+          'showDeleted': false,
+          'singleEvents': true,
+          'maxResults': 100,
+          'orderBy': 'startTime'
+        }).then(response => {
+          vm.items = response.result.items;
+        });
+
+      },
+      items: function(){
+        this.getEvents()
+      }
+
+    },
+
     methods: {
       /**
-       *  On load, called to load the auth2 library and API client library.
+       *  On load, called to load the auth2 library and Google API client library.
        */
       handleClientLoad() {
         this.api.load('client:auth2', this.initClient);
       },
 
       /**
-       *  Initializes the API client library and sets up sign-in state
+       *  Initializes the Google API client library and sets up sign-in state
        *  listeners.
        */
       initClient() {
@@ -71,7 +151,7 @@ export default {
       },
 
       /**
-       *  Sign in the user upon button click.
+       *  Sign in the google user upon button click.
        */
       handleAuthClick() {
         Promise.resolve(this.api.auth2.getAuthInstance().signIn())
@@ -81,7 +161,7 @@ export default {
       },
 
       /**
-       *  Sign out the user upon button click.
+       *  Sign out the google user upon button click.
        */
       handleSignoutClick() {
         Promise.resolve(this.api.auth2.getAuthInstance().signOut())
@@ -95,48 +175,49 @@ export default {
        * the authorized user's calendar. If no events are found an
        * appropriate message is printed.
        */
-      getData() {
-        let vm = this;
 
-        vm.api.client.calendar.events.list({
-          'calendarId': CALENDAR_ID,
-          'timeMin': (new Date()).toISOString(),
-          'showDeleted': false,
-          'singleEvents': true,
-          'maxResults': 10,
-          'orderBy': 'startTime'
-        }).then(response => {
-          vm.items = this.syntaxHighlight(response.result.items);
-            window.console.log(vm.items);
-        });
+
+      getStartDate(date){
+        var _d = new Date(Date.parse(date));
+        return _d.getDate()+"/"+_d.getMonth()+1+"/"+_d.getFullYear()
       },
 
-      syntaxHighlight(json) {
-        if (typeof json != 'string') {
-          json = JSON.stringify(json, undefined, 2);
+
+      /* Below methods for calendar viewing */
+
+      getEvents () {
+        const events = []
+        for (var item in this.items){
+          events.push({
+            name: this.items[item].summary,
+            start: this.formatDate(this.items[item].start.dateTime),
+            end: this.formatDate(this.items[item].end.dateTime),
+            color: "orange",
+          })
+                  window.console.log('event :', events)
         }
-        json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g, match => {
-          var cls = 'number';
-          if (/^"/.test(match)) {
-            if (/:$/.test(match)) {
-              cls = 'key';
-            } else {
-              cls = 'string';
-            }
-          } else if (/true|false/.test(match)) {
-            cls = 'boolean';
-          } else if (/null/.test(match)) {
-            cls = 'null';
-          }
-          return '<span class="' + cls + '">' + match + '</span>';
-        });
-      }
+
+        this.events = events
+
+      },
+      getEventColor (event) {
+        return event.color
+      },
+
+      formatDate (a) {
+        a = new Date(Date.parse(a))
+        return `${a.getFullYear()}-${a.getMonth() + 1}-${a.getDate()} ${a.getHours()}:${a.getMinutes()}`
+      },
     }
   };
 </script>
 
 <style scoped>
+
+  #calendar /deep/ {
+      background-color: #293742 !important;
+  }
+
 .authentification {
 margin: 20px;
 text-align: center;
