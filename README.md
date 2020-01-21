@@ -28,3 +28,7 @@ generate icons for app :
 
 https://code.luasoftware.com/tutorials/vuejs/vuejs-pwa-manifest-icons-and-favicon/
 https://realfavicongenerator.net/
+
+Authentification inspiration :
+
+https://blog.sqreen.com/authentication-best-practices-vue/

@@ -1,77 +1,22 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import Vue from "vue";
+import Vuex from "vuex";
+import user from "./modules/user";
+import auth from "./modules/auth";
+import heater from "./modules/heater";
+import temperatures from "./modules/temperatures";
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 
-const timerModule = {
-    state: {
-      expectedEnd: ''
-    },
-    mutations: {
-
-      START_TIMER: (state, date) => {
-      state.expectedEnd = date
-      },
-
-    },
-    getters: {
-       getEndTime: (state) => {
-         return state.expectedEnd
-       }
-    },
-    actions: {
-
-    },
-    strict: true
-}
+const debug = process.env.NODE_ENV !== "production";
 
 const store = new Vuex.Store({
-  state: {
-    heaterState: '',
-  },
-  mutations: {
-
-    STATE_ON: (state) => {
-      state.heaterState = 'ON'
-    },
-
-    STATE_OFF: (state) => {
-      state.heaterState = 'OFF'
-    },
-
-    SET_STATE: (state, s) => {
-      state.heaterState = s
-    },
-
-    SWITCH_STATE: (state) => {
-        if (state.heaterState === 'OFF') this.commit('STATE_ON')
-        else if(state.heaterState === 'ON') this.commit('STATE_OFF')
-      }
-
-
-  },
-  getters: {
-     getHeaterState: (state) => {
-       return state.heaterState
-     }
-  },
-  actions: {
-    setHeaterState(state,s) {
-  //      console.log('state in setHeaterState :', state)
-        if (s === 'ON') store.commit('STATE_ON')
-        else if(s === 'OFF') store.commit('STATE_OFF')
-    },
-
-    switchHeaterState(state, s) {
-//      console.log('state in switchHeaterState :', s)
-      if (s === 'OFF') store.commit('STATE_ON')
-      else if(s === 'ON') store.commit('STATE_OFF')
-    }
-  },
   modules: {
-    timer: timerModule
+    heater,
+    auth,
+    user,
+    temperatures
   },
-  strict: true
-})
+  strict: debug
+});
 
 export default store

@@ -1,11 +1,19 @@
 import Vue from 'vue'
+import './plugins/axios'
 import App from './App.vue'
 import './registerServiceWorker'
 import router from './router'
 import store from './store'
 import vuetify from './plugins/vuetify'
 import VueMqtt from 'vue-mqtt'
+import axios from 'axios'
 
+
+
+const token = localStorage.getItem('user-token')
+if (token) {
+  axios.defaults.headers.common['Authorization'] = token
+}
 
 Vue.use(VueMqtt,
         'wss://mqtt.seed.fr.nf:8886',
@@ -35,9 +43,5 @@ new Vue({
   router,
   store,
   vuetify,
-  render: h => h(App),
-
-  mounted() {
-      this.$mqtt.subscribe('home/#')
-  }
+  render: h => h(App)
 })

@@ -74,8 +74,7 @@
 
 <script>
 import Vue from 'vue'
-import {mapGetters} from 'vuex'
-import {mapActions} from 'vuex'
+import {mapGetters, mapActions} from 'vuex'
 import Bars from 'vuebars';
 import VueMqtt from 'vue-mqtt'
 

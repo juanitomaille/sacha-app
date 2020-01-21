@@ -6,7 +6,7 @@ module.exports = {
   devServer: {
     disableHostCheck: true,
     //public: 'sachat.seed.fr.nf',
-    //proxy: 'https://localhost:8080',
+    proxy: 'https://localhost:8080',
   },
   pwa: {
     name: 'Sachat',

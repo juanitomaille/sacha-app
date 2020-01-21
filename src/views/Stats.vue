@@ -1,30 +1,40 @@
 <template>
   <div id="stats" class="text-center">
-        <h1 class="display-2 font-weight-bold mb-3">Stats</h1>
+        <h1 :class="{'display-3': $vuetify.breakpoint.smAndUp,}" class="font-weight-bold mb-3">Stats</h1>
   <v-layout wrap row class="justify-center">
 
-    <v-flex xs12 sm6 md3 v-for="capteur in sensors"
-            :key="capteur.id">
+    <v-flex xs12 sm6 md3 v-for="(temp, sensor) in sensors"
+            :key="temp.id">
 
       <v-card
+              d-block
               hover
               elevation-3
-              height="15vh"
-              min-width="20vw"
-              max-width="250"
+
+              min-width="10vw"
+              max-width="250px"
+              min-height="8vh"
               color="darken2"
               :class="`justify-space-around ma-6`">
-          <v-card-title class="yellow--text">{{capteur.place}}</v-card-title>
+          <v-card-title class="yellow--text">{{sensor}}</v-card-title>
           <v-card-text class="orange--text" >
             <div v-if="(sensors == '')"><v-progress-circular/></div>
-              <v-row v-else>
-                <v-col align="right" class="display-3" cols="9">
-                  {{capteur.value}}
+            <v-container v-else>
+              <v-row>
+                <v-col
+                  align="right"
+                  :class="{
+                    'display-3': $vuetify.breakpoint.smAndUp,
+                    'display-2': $vuetify.breakpoint.xsOnly
+                                              }"
+                  cols="9">
+                  {{temp}}
                 </v-col>
                 <v-col align="left" cols="3" >
                   &deg;C
                 </v-col>
               </v-row>
+              </v-container>
           </v-card-text>
       </v-card>
     </v-flex>
@@ -32,9 +42,14 @@
 </div>
 </template>
 
+<style>
+
+</style>
+
+
 <script>
 
-
+import { mapGetters, mapActions } from "vuex";
 
 
 export default {
@@ -45,7 +60,7 @@ export default {
 
     data() {
         return {
-            sensors: [],
+            sensors: JSON.parse(localStorage.getItem("sensors")) || {},
         }
     },
 
@@ -56,22 +71,25 @@ export default {
 
         window.console.log(topic + ': ' + t)
 
-        var index = this.sensors.map(function(e) { return e.place; }).indexOf(place);
+        this.storeSensorValues({place, t})
+        // search for an occurence of this place
 
-        if(index == '-1'){
-           this.sensors.push(JSON.parse('{ "place": "'+ place + '" , "value" : "' + parseFloat(t).toFixed(1) + '"}'))
+        this.sensors = this.getTemperatures()
+        localStorage.setItem("sensors", JSON.stringify(this.sensors));
         }
-        else {
-          this.sensors[index].value = parseFloat(t).toFixed(1)
-        }
-      },
+        //then put this array in Store
     },
 
     mounted() {
     },
 
     methods: {
-
+      ...mapActions({
+        storeSensorValues : 'storeSensorValues'
+      }),
+      ...mapGetters({
+        getTemperatures : 'getTemperatures'
+      })
     }, // --- End of methods --- //
 
     computed: {
