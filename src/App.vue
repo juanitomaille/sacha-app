@@ -112,7 +112,7 @@ export default {
 
   mounted() {
     this.$mqtt.subscribe('home/#')
-    window.console.log("profile : ", this.profile)
+    //window.console.log("profile : ", this.profile)
   },
 
   created: function() {
