@@ -48,7 +48,7 @@
 
         <v-list-item link :to="{path:'/calendar'}">
           <v-list-item-action>
-            <v-icon>mdi-chart-areaspline-variant</v-icon>
+            <v-icon>mdi-calendar-clock</v-icon>
           </v-list-item-action>
           <v-list-item-content>
             <v-list-item-title>Programmation</v-list-item-title>
