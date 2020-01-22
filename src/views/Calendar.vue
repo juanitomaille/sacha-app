@@ -2,12 +2,9 @@
   <div class="Calendar">
     <h2>Calendrier</h2>
     <div class='authentification'>
-      <v-btn v-if='!authorized' @click="handleAuthClick" depressed small class="primary"> Connection </v-btn>
+      <v-btn v-if='!authorized' @click.stop="initAPI" depressed small class="primary"> Connection </v-btn>
     </div>
     <hr>
-
-
-
 
     <div>
     <v-sheet
@@ -23,7 +20,6 @@
       >
         <v-icon>mdi-chevron-left</v-icon>
       </v-btn>
-
       <v-spacer></v-spacer>
       <v-btn
         icon
@@ -33,7 +29,7 @@
         <v-icon>mdi-chevron-right</v-icon>
       </v-btn>
     </v-sheet>
-    <v-sheet height="600">
+    <v-sheet height="70vh">
       <v-calendar
         id="calendar"
         dark
@@ -57,26 +53,16 @@
 
   </div>
 </template>
-
-<script type="text/javascript" src="https://apis.google.com/js/api.js"></script>
-
 <script>
 
-// Array of API discovery doc URLs for APIs used by the quickstart
-const DISCOVERY_DOCS = ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'];
-// Authorization scopes required by the API; multiple scopes can be
-// included, separated by spaces.
-const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
-
-import '@/utils/gapi.js'
-import {API_KEY, CLIENT_ID, CALENDAR_ID} from '@/config.js'
+import {mapActions} from 'vuex'
 
 export default {
     name: "calendar",
     data() {
       return {
         /* for google API */
-        items: undefined,
+        itemsFromGoogleApi: undefined,
         api: undefined,
         authorized: false,
 
@@ -92,89 +78,30 @@ export default {
     },
 
     created() {
-      this.api = gapi;
-      this.handleClientLoad();
-    },
 
-    mounted(){
+      this.authenticated = this.$gapi.isAuthenticated();
 
-
-
-    },
-
-    watch: {
-      authorized: function() {
-        let vm = this;
-
-        vm.api.client.calendar.events.list({
-          'calendarId': CALENDAR_ID,
-          'timeMin': (new Date()).toISOString(),
-          'showDeleted': false,
-          'singleEvents': true,
-          'maxResults': 100,
-          'orderBy': 'startTime'
-        }).then(response => {
-          vm.items = response.result.items;
-        });
-
-      },
-      items: function(){
-        this.getEvents()
+      try {
+        // NOTE: 45min refresh policy is what google recommends
+        window.setInterval(this.$refreshToken(), 1000 * 60 * 45)
+      } catch (e) {
+        console.error(e)
       }
+    },
+    mounted() {
+    },
 
+
+    computed: {
     },
 
     methods: {
-      /**
-       *  On load, called to load the auth2 library and Google API client library.
-       */
-      handleClientLoad() {
-        this.api.load('client:auth2', this.initClient);
-      },
 
-      /**
-       *  Initializes the Google API client library and sets up sign-in state
-       *  listeners.
-       */
-      initClient() {
-        let vm = this;
+      ...mapActions({
+        isSignedIn: 'isSignedIn',
+         initAPI: 'initAPI'
+       }),
 
-        vm.api.client.init({
-          apiKey: API_KEY,
-          clientId: CLIENT_ID,
-          discoveryDocs: DISCOVERY_DOCS,
-          scope: SCOPES
-        }).then(_ => {
-          // Listen for sign-in state changes.
-          vm.api.auth2.getAuthInstance().isSignedIn.listen(vm.authorized);
-        });
-      },
-
-      /**
-       *  Sign in the google user upon button click.
-       */
-      handleAuthClick() {
-        Promise.resolve(this.api.auth2.getAuthInstance().signIn())
-          .then(_ => {
-            this.authorized = true;
-          });
-      },
-
-      /**
-       *  Sign out the google user upon button click.
-       */
-      handleSignoutClick() {
-        Promise.resolve(this.api.auth2.getAuthInstance().signOut())
-          .then(_ => {
-            this.authorized = false;
-          });
-      },
-
-      /**
-       * Print the summary and start datetime/date of the next ten events in
-       * the authorized user's calendar. If no events are found an
-       * appropriate message is printed.
-       */
 
 
       getStartDate(date){
@@ -183,33 +110,11 @@ export default {
       },
 
 
-      /* Below methods for calendar viewing */
-
-      getEvents () {
-        const events = []
-        for (var item in this.items){
-          events.push({
-            name: this.items[item].summary,
-            start: this.formatDate(this.items[item].start.dateTime),
-            end: this.formatDate(this.items[item].end.dateTime),
-            color: "orange",
-          })
-                  window.console.log('event :', events)
-        }
-
-        this.events = events
-
-      },
       getEventColor (event) {
         return event.color
       },
-
-      formatDate (a) {
-        a = new Date(Date.parse(a))
-        return `${a.getFullYear()}-${a.getMonth() + 1}-${a.getDate()} ${a.getHours()}:${a.getMinutes()}`
-      },
     }
-  };
+  }
 </script>
 
 <style scoped>

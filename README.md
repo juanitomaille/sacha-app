@@ -7,13 +7,20 @@ He can do that when i poke him or with a google calendar connexion (A fresh cale
 It's a Work in progress but you can install it in a docker container...at your own risk !
 
 dependencies : Vuetify, Router, Vuex.
-Plugins : Vuebars, vue-mqtt, axios
+Plugins :
+Vuebars : show some beautiful histogram graphs
+vue-mqtt: connect to MQTT broker with MQTT.js lib
+axios: API utility (web hooks)
+vue-gapi: simplify Google API connexion
+vuex-persistedstate:  Vuex Persistence onto page reload
 
 ## Project setup
 ```
 npm i vuebars -S
 npm install --save vue-mqtt
 npm install --save axios
+npm install --save vue-gapi
+npm install --save vuex-persistedstate
 ```
 
 ### Compiles and hot-reloads for development
