@@ -180,7 +180,7 @@ export default {
 
     startHeater: function() {
       this.$mqtt.publish('home/heater/state', 'ON')
-      this.startCountDown(0, 15)
+      this.startCountDown(30, 0) // (minutes, seconds)
       window.console.log('[startHeater] state in vuex store :', this.getHeaterState)
     },
 

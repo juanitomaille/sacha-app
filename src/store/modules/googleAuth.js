@@ -1,6 +1,6 @@
 import Vue from "vue";
 import VueGAPI from "vue-gapi";
-import createPersistedState from 'vuex-persistedstate';
+//import createPersistedState from 'vuex-persistedstate';
 
 import {API_KEY, CLIENT_ID, CALENDAR_ID} from '@/config.js'
 // Array of API discovery doc URLs for APIs used by the quickstart
@@ -21,8 +21,8 @@ const apiConfig = {
 Vue.use(VueGAPI, apiConfig);
 
 const googleAuth = {
-  namespaced: true,
-  plugins: [createPersistedState()],
+//  namespaced: true,
+//  plugins: [createPersistedState()],
   state: {
     authenticated: false,
     userData: null,
@@ -41,21 +41,38 @@ const googleAuth = {
       state.events = obj
     }
   },
+
+  getters: {
+    /* Below method for v-calendar object */
+    getEventsFormatted(data) {
+      const events = []
+      for (var item in data){
+        events.push({
+          name: data[item].summary,
+          start: this.formatDate(data[item].start.dateTime),
+          end: this.formatDate(data[item].end.dateTime),
+          color: "orange",
+        })
+      }
+      return events
+    }
+  },
+
   actions: {
 
-    initAPI(state) {
+    initAPI(state, gapi) {
 
-      this.$gapi
-        .login()
-        .then(() => {
+      gapi
+      .login()
+      .then(() => {
           window.console.log("Successfully authenticated");
-          state.commit('LOGIN',this.$gapi.getUserData());
+          state.commit('LOGIN',gapi.getUserData());
         })
     },
 
-    logout(state) {
-        if (this.$gapi.isAuthenticated()) {
-          this.$gapi
+    logout(state,gapi) {
+        if (gapi.isAuthenticated()) {
+          gapi
             .logout()
             .then(() => {
               window.console.log("Successfully logged out");
@@ -67,9 +84,8 @@ const googleAuth = {
           }
         },
 
-    async retrieveEvents(state) {
-      let vm = this
-      try { vm.$gapi.calendar.events.list({
+    async retrieveEvents(state,gapi) {
+      try { gapi.calendar.events.list({
           CALENDAR_ID,
           'timeMin': (new Date()).toISOString(),
           'showDeleted': false,
@@ -86,11 +102,11 @@ const googleAuth = {
       }
     },
 
-    isSignedIn({ dispatch, commit, state }) {
+    isSignedIn({ dispatch, commit, state },gapi) {
       return new Promise((resolve) => {
         dispatch('login').then(() => {
           var currentUser = null;
-          try { currentUser = this.$gapi.auth2.getAuthInstance().currentUser.get(); }
+          try { currentUser = gapi.auth2.getAuthInstance().currentUser.get(); }
           catch (e) { resolve(false); }
 
           // not signed in - delete persisted user
@@ -111,25 +127,11 @@ const googleAuth = {
           }
         })
       })
-    },
-    getters: {
-      /* Below method for v-calendar object */
-      getEventsFormatted(data) {
-        const events = []
-        for (var item in data){
-          events.push({
-            name: data[item].summary,
-            start: this.formatDate(data[item].start.dateTime),
-            end: this.formatDate(data[item].end.dateTime),
-            color: "orange",
-          })
-        }
-        return events
-      }
     }
   },
   strict: true
 }
+
 
 
 

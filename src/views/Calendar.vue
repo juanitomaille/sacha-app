@@ -2,7 +2,7 @@
   <div class="Calendar">
     <h2>Calendrier</h2>
     <div class='authentification'>
-      <v-btn v-if='!authorized' @click.stop="initAPI" depressed small class="primary"> Connection </v-btn>
+      <v-btn v-if='!authorized' @click.stop="setAPI" depressed small class="primary"> Connection </v-btn>
     </div>
     <hr>
 
@@ -81,11 +81,12 @@ export default {
 
       this.authenticated = this.$gapi.isAuthenticated();
 
+
       try {
         // NOTE: 45min refresh policy is what google recommends
         window.setInterval(this.$refreshToken(), 1000 * 60 * 45)
       } catch (e) {
-        console.error(e)
+        window.console.error(e)
       }
     },
     mounted() {
@@ -113,6 +114,10 @@ export default {
       getEventColor (event) {
         return event.color
       },
+
+      setAPI(){
+        this.initAPI(this.$gapi)
+      }
     }
   }
 </script>
